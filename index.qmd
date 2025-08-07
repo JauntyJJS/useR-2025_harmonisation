@@ -1611,7 +1611,8 @@ To make a Quarto book or website, we need a `_quarto.yml` and `index.qmd` file
 
 We create an `index.qmd` file for technical report generation.
 
-![](images/index_report_qmd.png){fig-alt="A preview of the index.qmd file for technical reporting." fig-align="center" width="40%"}
+![](images/index_report_qmd.png){fig-alt="A preview of the index qmd file for technical reporting." fig-align="center" width="60%"}
+
 
 ::: footer
 
@@ -1770,7 +1771,7 @@ purrr::walk(
 
 A similar method is done to create a summary report in word using [`flextable`](https://davidgohel.github.io/flextable/).
 
-![](images/summary_report.png){fig-alt="Preview of summary report." fig-align="center" width="70%"}
+![](images/summary_report.png){fig-alt="Preview of summary report." fig-align="center" width="60%"}
 
 ::: footer
 

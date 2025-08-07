@@ -1,0 +1,2207 @@
+--- 
+format:
+  revealjs:
+    theme: [custom.scss]
+    mainfont: "Lato"
+    code-line-numbers: true
+    code-annotations: false
+    code-overflow: scroll
+    controls: true
+    progress: true
+    #slide-number: true # slide number determined be no_logo_at_title_slide.js
+    scrollable: true
+    transition: fade
+    background-transition: fade
+    highlight-style: arrow-dark
+    logo: images/qr.png
+    pointer:
+      pointerSize: 24
+      color: '#32cd32'
+    include-after-body: no_logo_at_title_slide.js
+    include-in-header:
+      text: |
+        <meta name="github-repo" content="JauntyJJS/useR-2025_harmonisation />
+        <meta name="twitter:title" content="Retrospective clinical data harmonisation reporting" />
+        <meta name="twitter:description" content="Presentation for useR! 2025." />
+        <meta name="twitter:url" content="https://jauntyjjs.github.io/useR-2025_harmonisation/" />
+        <meta name="twitter:image" content="https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/share-card.png" />
+        <meta name="twitter:image:alt" content="Title slide of Retrospective clinical data harmonisation reporting presented at useR! 2025." />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:creator" content="@JauntyJJS" />
+        <meta name="twitter:site" content="@JauntyJJS" />
+        <meta property="og:title" content="Retrospective clinical data harmonisation reporting" />
+        <meta property="og:description" content="Presentation for useR! 2025." />
+        <meta property="og:url" content="https://jauntyjjs.github.io/useR-2025_harmonisation/" />
+        <meta property="og:image" content="https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/share-card.png" />
+        <meta property="og:image:alt" content="Title slide of Retrospective clinical data harmonisation reporting presented at useR! 2025." />
+        <meta property="og:site_name" content="useR! 2025" />
+        <meta property="og:type" content="website" />
+        <meta property="og:locale" content="en_UK" />
+        <meta property="article:author" content="Jeremy Selva" />
+revealjs-plugins:
+  - pointer
+filters:
+  - code-fullscreen
+params:
+  show_table: TRUE
+--- 
+
+```{r}
+#| label: for presentation
+#| include: false
+
+library(fontawesome)
+library(knitr)
+library(yaml)
+library(rmarkdown)
+
+out_type <- knitr::opts_chunk$get("rmarkdown.pandoc.to")
+```
+
+```{r}
+#| label: for harmonisation
+#| include: false
+#| echo: false
+
+library(quarto)
+library(dplyr)
+library(magrittr)
+library(stringr)
+library(forcats)
+library(tibble)
+library(here)
+library(testthat)
+library(readxl)
+library(vroom)
+library(pointblank)
+library(reactable)
+
+library(ggplot2)
+library(RVenn)
+library(ggVennDiagram)
+library(ComplexUpset)
+
+source("R/factor-reactable.R")
+source("R/integer-check.R")
+source("R/rounding.R")
+
+```
+
+<br><br>
+
+<h1> Retrospective clinical data harmonisation reporting using R and Quarto </h1>
+
+<hr>
+
+<h3> Jeremy Selva [`r fontawesome::fa(name = "linkedin", fill = "#0077ac")`](https://www.linkedin.com/in/jeremy-selva-085b9112a/){target="_blank"} </h3>
+
+@JauntyJJS [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS){target="_blank"} [`r fontawesome::fa(name = "fab fa-square-x-twitter", fill = "#000000")`](https://twitter.com/JauntyJJS){target="_blank"} [`r fontawesome::fa(name = "bluesky", fill = "#1084ff")`](https://bsky.app/profile/jauntyjjs.bsky.social){target="_blank"} [<svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#5f53e7;overflow:visible;position:relative;"><path d="M433 179.1c0-97.2-63.7-125.7-63.7-125.7-62.5-28.7-228.6-28.4-290.5 0 0 0-63.7 28.5-63.7 125.7 0 115.7-6.6 259.4 105.6 289.1 40.5 10.7 75.3 13 103.3 11.4 50.8-2.8 79.3-18.1 79.3-18.1l-1.7-36.9s-36.3 11.4-77.1 10.1c-40.4-1.4-83-4.4-89.6-54a102.5 102.5 0 0 1 -.9-13.9c85.6 20.9 158.7 9.1 178.8 6.7 56.1-6.7 105-41.3 111.2-72.9 9.8-49.8 9-121.5 9-121.5zm-75.1 125.2h-46.6v-114.2c0-49.7-64-51.6-64 6.9v62.5h-46.3V197c0-58.5-64-56.6-64-6.9v114.2H90.2c0-122.1-5.2-147.9 18.4-175 25.9-28.9 79.8-30.8 103.8 6.1l11.6 19.5 11.6-19.5c24.1-37.1 78.1-34.8 103.8-6.1 23.7 27.3 18.4 53 18.4 175z"/></svg>](https://fosstodon.org/@JauntyJJS){target="_blank"} <br> [*https://jeremy-selva.netlify.app* `r fontawesome::fa(name = "link", fill = "#666666")`](https://jeremy-selva.netlify.app/){target="_blank"} <br> 
+
+For [useR! 2025 `r fontawesome::fa(name = "link", fill = "#666666")`](https://user2025.r-project.org/){target="_blank"} </h3>
+
+![](images/useR!_2025.png){.absolute top=380 right=20 width="45%" fig-alt="useR! 2025 Logo."}
+
+9 August 2025
+
+## whoami
+
+Research Officer from [National Heart Centre Singapore](https://www.nhcs.com.sg/){target="_blank"} who collects, cleans and harmonises clinical data.
+
+![](images/allison_horst2.png){fig-alt="Picture by Allison Horst about a data analyst facing a dataset in the form of a monster." fig-align="center" width="70%"}
+
+[Taming the Data Beast from ["Cleaning Medical Data with R"](https://www.pipinghotdata.com/workshops/2023-06-06-cleaning-medical-data-with-r/){target="_blank"} workshop by Shannon Pileggi, Crystal Lewis and Peter Higgins presented at R/Medicine 2023. Illustrated by [Allison Horst](https://allisonhorst.com/){target="_blank"}]{style="font-size: 60%;"}.
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## About Data Harmonisation
+
+Data harmonisation is part of data wrangling process where
+
+::: {.fragment}
+-  [Similar variables from different datasets are identified.]{style="font-size: 80%;"}
+:::
+::: {.fragment}
+-  [Grouped based on a generalised concept they represent.]{style="font-size: 80%;"}
+:::
+::: {.fragment}
+-  [Transformed into unified harmonised variables for analysis.]{style="font-size: 80%;"}
+:::
+
+![](images/data_harmonisation.png){fig-alt="The data harmonization process: Study data variables collected from different sources need to be mapped to one another, classified into the generalized concepts they represent, and transformed into unified harmonized variables for analysis" fig-align="center" width="70%"}
+
+[Image from Mallya et al. Circ Cardiovasc Qual Outcomes. 2023 Nov; 16(11):e009938 doi: [10.1161/CIRCOUTCOMES.123.009938](https://doi.org/10.1161/CIRCOUTCOMES.123.009938){target="_blank"}]{style="font-size: 60%;"}.
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## How it started
+
+![](images/welcome.png){fig-alt="Figure showing me welcoming the collaborator to the project and sending them a data dictionary and template file for them to use and send the data back to me." fig-align="center" width="70%"}
+
+[[Cheerful Businessman](https://www.vecteezy.com/png/57446607-a-cheerful-little-businessman-carrying-a-briefcase-walks-confidently-on-a-bright-day-in-a-fun-animated-style-little-business-man-illustrationisolated-on-transparent-background){target="_blank"} designed by [Iftikhar Alam](https://www.vecteezy.com/members/iftikharalam){target="_blank"} from [Vecteezy](http://www.vecteezy.com){target="_blank"} and [Medical Doctor Man](https://creazilla.com/media/clipart/33960/trevor-medical-doctor-man){target="_blank"} from [Creazilla](https://creazilla.com/){target="_blank"}]{style="font-size: 60%;"}.
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## How it started
+
+![](images/collaborator_issue.png){fig-alt="Figure showing the collaborator sharing that he does not have an analyst to do the mapping and warns that if his end were to do it himself, it will take a long time." fig-align="center" width="70%"}
+
+[[Cheerful Businessman](https://www.vecteezy.com/png/57446607-a-cheerful-little-businessman-carrying-a-briefcase-walks-confidently-on-a-bright-day-in-a-fun-animated-style-little-business-man-illustrationisolated-on-transparent-background){target="_blank"} designed by [Iftikhar Alam](https://www.vecteezy.com/members/iftikharalam){target="_blank"} from [Vecteezy](http://www.vecteezy.com){target="_blank"} and [Medical Doctor Man](https://creazilla.com/media/clipart/33960/trevor-medical-doctor-man){target="_blank"} from [Creazilla](https://creazilla.com/){target="_blank"}]{style="font-size: 60%;"}.
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## How it started
+
+![](images/collaborator_request_1.png){fig-alt="Figure showing the collaborator saying that they will send the data to me and ask me to do the data harmonisation instead." fig-align="center" width="70%"}
+
+[[Cheerful Businessman](https://www.vecteezy.com/png/57446607-a-cheerful-little-businessman-carrying-a-briefcase-walks-confidently-on-a-bright-day-in-a-fun-animated-style-little-business-man-illustrationisolated-on-transparent-background){target="_blank"} designed by [Iftikhar Alam](https://www.vecteezy.com/members/iftikharalam){target="_blank"} from [Vecteezy](http://www.vecteezy.com){target="_blank"} and [Medical Doctor Man](https://creazilla.com/media/clipart/33960/trevor-medical-doctor-man){target="_blank"} from [Creazilla](https://creazilla.com/){target="_blank"}]{style="font-size: 60%;"}.
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## How it started
+
+![](images/qa_image_monkeyuser.png){fig-alt="Figure showing a sad guy receving a package/data full of bugs and issue." fig-align="center" width="70%"}
+
+[[snapshot from Ready for QA | MonkeyUser 2SP Animation Video](https://www.youtube.com/watch?v=5Z8HDADU57U&ab_channel=MonkeyUser){target="_blank"} from [MonkeyUser.com](https://www.monkeyuser.com/)]{style="font-size: 60%;"}.
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## How it started
+
+![](images/qa_image_monkeyuser_9_times.png){fig-alt="A 3 by 3 repeared figure showing a sad guy receving a package/data full of bugs and issue." fig-align="center" width="70%"}
+
+[[snapshot from Ready for QA | MonkeyUser 2SP Animation Video](https://www.youtube.com/watch?v=5Z8HDADU57U&ab_channel=MonkeyUser){target="_blank"} from [MonkeyUser.com](https://www.monkeyuser.com/)]{style="font-size: 60%;"}.
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## How it started
+
+Turn my sorrow into opportunities.
+
+```{=html}
+<iframe width="950" height="540" src="https://jauntyjjs.github.io/useR-2024/#/title-slide" frameborder="0" allowfullscreen></iframe>
+```
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## How it started
+
+![](images/collaborator_request_2.png){fig-alt="Figure showing the collaborator saying that they need the harmonised dataset back with a report for higher management to show to data auditors." fig-align="center" width="70%"}
+
+[[Cheerful Businessman](https://www.vecteezy.com/png/57446607-a-cheerful-little-businessman-carrying-a-briefcase-walks-confidently-on-a-bright-day-in-a-fun-animated-style-little-business-man-illustrationisolated-on-transparent-background){target="_blank"} designed by [Iftikhar Alam](https://www.vecteezy.com/members/iftikharalam){target="_blank"} from [Vecteezy](http://www.vecteezy.com){target="_blank"} and [Medical Doctor Man](https://creazilla.com/media/clipart/33960/trevor-medical-doctor-man){target="_blank"} from [Creazilla](https://creazilla.com/){target="_blank"}]{style="font-size: 60%;"}.
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Additional Motivation
+
+Some data fields just cannot be planned in advanced.
+
+![](images/ethnicity_table.png){fig-alt="Figure showing different race or ethnicity grouping from different collaborators that it is impossible to plan race or ethnicity grouping." fig-align="center" width="60%"}
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Issues
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+While there are R packages to facilitate data harmonisation,
+
+*  [`retroharmonize`](https://github.com/rOpenGov/retroharmonize/){target="_blank"} for survey data.
+*  [`Rmonize`](https://maelstrom-research.github.io/Rmonize-documentation/index.html){target="_blank"} for epidemiological data.
+*  [`psHarmonize`](https://github.com/NUDACC/psHarmonize){target="_blank"} for health and education data.
+
+::: {.fragment}
+
+There are limited resources on how to make a data harmonisation report.
+
+:::
+
+:::
+
+::: {.column width="50%"}
+
+![](images/210-denvercoder9.png){fig-alt="Comic from Monkeyuser.com showing that it is hard to get help with programming issues." fig-align="center" width="70%"}
+
+[[Denvercoder9](https://www.monkeyuser.com/2021/denvercoder9/){target="_blank"} from [MonkeyUser.com](https://www.monkeyuser.com/){target="_blank"}]{style="font-size: 60%;"}
+
+:::
+
+::::
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Harmonisation Project Template
+
+A template to offer a systematic way to report data harmonisation processes. 
+
+[Link: <https://jauntyjjs.github.io/harmonisation/>]
+
+```{=html}
+<iframe width="1000" height="500" src="https://jauntyjjs.github.io/harmonisation/" title="Harmonisation template" ></iframe>
+```
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Workflow with collaborators
+
+Collaborator can send the raw data once and you keep updating the cleaned data for harmonsation.
+
+![](images/collaborator_no_change_raw_data_workflow.png){fig-alt="Picture showing a top workfow to first clean data for harmonisation before doing the actual harmonisation. Bottom workflow to verfiy with the collaborators and update the clean data for harmonisation periodically" fig-align="center" width="100%"}
+
+[[Dataset vectors](https://www.vecteezy.com/vector-art/25844300-abstract-database-info-silhouette-illustration){target="_blank"} by [Vectora Artworks](https://www.vecteezy.com/members/vectoroartworks){target="_blank"} from [Vecteezy](https://www.vecteezy.com/){target="_blank"}.]{style="font-size: 60%;"}
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Workflow with collaborators
+
+![](images/collaborator_request_3.png){fig-alt="Figure showing the collaborator saying that they need the updated raw data in addition to the harmonised data." fig-align="center" width="70%"}
+
+[[Cheerful Businessman](https://www.vecteezy.com/png/57446607-a-cheerful-little-businessman-carrying-a-briefcase-walks-confidently-on-a-bright-day-in-a-fun-animated-style-little-business-man-illustrationisolated-on-transparent-background){target="_blank"} designed by [Iftikhar Alam](https://www.vecteezy.com/members/iftikharalam){target="_blank"} from [Vecteezy](http://www.vecteezy.com){target="_blank"} and [Medical Doctor Man](https://creazilla.com/media/clipart/33960/trevor-medical-doctor-man){target="_blank"} from [Creazilla](https://creazilla.com/){target="_blank"}]{style="font-size: 60%;"}.
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Workflow with collaborators
+
+![](images/collaborator_request_3_met.png){fig-alt="Figure showing the data analyst providing the updated raw data and harmonised data." fig-align="center" width="70%"}
+
+[[Cheerful Businessman](https://www.vecteezy.com/png/57446607-a-cheerful-little-businessman-carrying-a-briefcase-walks-confidently-on-a-bright-day-in-a-fun-animated-style-little-business-man-illustrationisolated-on-transparent-background){target="_blank"} designed by [Iftikhar Alam](https://www.vecteezy.com/members/iftikharalam){target="_blank"} from [Vecteezy](http://www.vecteezy.com){target="_blank"} and [Medical Doctor Man](https://creazilla.com/media/clipart/33960/trevor-medical-doctor-man){target="_blank"} from [Creazilla](https://creazilla.com/){target="_blank"}]{style="font-size: 60%;"}.
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Workflow with collaborators
+
+Collaborator can update the raw data. For example, adding new clinical data, add more patients, correct errors.
+
+![](images/collaborator_change_raw_data_workflow.png){fig-alt="Picture showing a top workfow to first clean data for harmonisation before doing the actual harmonisation. Bottom workflow to verfiy with the collaborators and update the raw data for harmonisation periodically" fig-align="center" width="100%"}
+
+[[Dataset vectors](https://www.vecteezy.com/vector-art/25844300-abstract-database-info-silhouette-illustration){target="_blank"} by [Vectora Artworks](https://www.vecteezy.com/members/vectoroartworks){target="_blank"} from [Vecteezy](https://www.vecteezy.com/){target="_blank"}.]{style="font-size: 60%;"}
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Workflow with collaborators
+
+New version means new bugs or reopen issues to fix. Is there an automated way to catch warnings/issues when reading these updated files ?
+
+![](images/collaborator_change_raw_data_issue.png){fig-alt="Picture showing that new version of raw data sent by collaborator can give new issues to a supposedly fixed problem" fig-align="center" width="100%"}
+
+[[Dataset vectors](https://www.vecteezy.com/vector-art/25844300-abstract-database-info-silhouette-illustration){target="_blank"} by [Vectora Artworks](https://www.vecteezy.com/members/vectoroartworks){target="_blank"} from [Vecteezy](https://www.vecteezy.com/){target="_blank"}. [Anticipate](https://www.monkeyuser.com/2022/anticipate/){target="_blank"} from [MonkeyUser.com](https://www.monkeyuser.com/){target="_blank"}]{style="font-size: 60%;"}
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Automated capture of warnings (csv)
+
+Is there an automated way to catch warnings/issues when reading csv files ?
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+```{r}
+#| label: read data with warnings csv
+#| echo: true
+#| code-line-numbers: "|9|13"
+#| warning: true
+
+cohort_data_csv <- vroom::vroom(
+  file = here::here("data-raw", "Cohort_csv", 
+    "data_to_harmonise_age_issue.csv"),
+  delim = ",",
+  col_select = 1:2,
+  show_col_types = FALSE,
+  col_types = list(
+    ID = vroom::col_character(), 
+    Age = vroom::col_integer()
+  )
+)
+
+head(cohort_data_csv, n = 3)
+
+```
+
+:::
+
+::: {.column width="50%"}
+
+![](images/age_issue_csv.jpg){fig-alt="A csv file with text data in the Age column." fig-align="center" width="100%"}
+
+:::
+
+::::
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Automated capture of warnings (csv)
+
+If there are issues with the data, the output of [`vroom::problems`](https://vroom.r-lib.org/reference/problems.html){target="_blank"} will be a tibble.
+
+```{r}
+#| label: view problem in vroom
+#| echo: true
+#| warning: true
+
+cohort_data_csv |> 
+  vroom::problems()
+
+```
+
+To check for this automatically, we can use [`pointblank::expect_row_count_match`](https://rstudio.github.io/pointblank/reference/row_count_match.html){target="_blank"}.
+
+```{r}
+#| label: safeguard problem with vroom and pointblank
+#| echo: true
+#| error: true
+
+cohort_data_csv |> 
+  vroom::problems() |> 
+  pointblank::expect_row_count_match(count = 0)
+
+```
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Automated capture of warnings (csv)
+
+Here is a case with no issues.
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+```{r}
+#| label: read data with no issues csv
+#| echo: true
+#| warning: true
+
+cohort_data_csv <- vroom::vroom(
+  file = here::here("data-raw", "Cohort_csv", 
+    "data_to_harmonise_age_issue_fixed.csv"),
+  delim = ",",
+  col_select = 1:2,
+  show_col_types = FALSE,
+  col_types = list(
+    ID = vroom::col_character(), 
+    Age = vroom::col_integer()
+  )
+)
+
+cohort_data_csv |> 
+  vroom::problems()
+
+```
+
+```{r}
+#| label: read data with no issues csv safeguard
+#| echo: true
+#| warning: true
+
+cohort_data_csv |> 
+  vroom::problems() |> 
+  pointblank::expect_row_count_match(count = 0)
+
+```
+
+:::
+
+::: {.column width="50%"}
+
+![](images/age_issue_fixed_csv.jpg){fig-alt="A csv file with only integer data in the Age column." fig-align="center" width="100%"}
+
+:::
+
+::::
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Automated capture of warnings (Excel)
+
+Is there an automated way to catch warnings/issues when reading Excel files ?
+
+::: {.column width="50%"}
+
+```{r}
+#| label: read data with warnings Excel
+#| echo: true
+#| warning: true
+
+cohort_data_excel <- readxl::read_excel(
+  path = here::here("data-raw", "Cohort_Excel", 
+    "data_to_harmonise_age_issue.xlsx"),
+  sheet = "Sheet1",
+  col_types = c(
+    "text", "numeric"
+    )
+  )
+```
+
+:::
+
+::: {.column width="50%"}
+
+![](images/age_issue_excel.jpg){fig-alt="An Excel file with text data in the Age column." fig-align="center" width="100%"}
+
+:::
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Automated capture of warnings (Excel)
+
+We can read the Excel file with [`testthat::expect_no_condition`](https://testthat.r-lib.org/reference/expect_error.html){target="_blank"}.
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+```{r}
+#| label: read data with issues using testthat
+#| echo: true
+#| code-line-numbers: "|1,8"
+#| error: true
+
+testthat::expect_no_condition(
+  cohort_data_excel <- readxl::read_excel(
+    path = here::here("data-raw", "Cohort_Excel", 
+      "data_to_harmonise_age_issue.xlsx"),
+    sheet = "Sheet1",
+    col_types = c("text", "numeric")
+  )
+)
+```
+
+:::
+
+::: {.column width="50%"}
+
+![](images/age_issue_excel.jpg){fig-alt="An Excel file with text data in the Age column." fig-align="center" width="100%"}
+
+:::
+
+::::
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Automated capture of warnings (Excel)
+
+However, this method means that you will lose the pipe workflow.
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+```{r}
+#| label: read data without issues using testthat
+#| echo: true
+
+testthat::expect_no_condition(
+  cohort_data_excel <- readxl::read_excel(
+    path = here::here("data-raw", "Cohort_Excel", 
+      "data_to_harmonise_age_issue_fixed.xlsx"),
+    sheet = "Sheet1",
+    col_types = c("text", "numeric")
+  )
+)
+
+cohort_data_excel <- cohort_data_excel |> 
+  # Check if Serial Number is unique
+  pointblank::rows_distinct(
+    columns = "Serial Number",
+  )
+```
+
+:::
+
+::: {.column width="50%"}
+
+![](images/age_issue_fixed_excel.jpg){fig-alt="An Excel file with numeric data in the Age column." fig-align="center" width="100%"}
+
+:::
+
+::::
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Automated capture of warnings (Excel)
+
+We can use the tee pipe operator [`%T>%`](https://magrittr.tidyverse.org/reference/tee.html){target="_blank"} from [magrittr](https://magrittr.tidyverse.org/){target="_blank"}.
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+:::{.center-h}
+[**With Issues**]{style="font-size: 80%;"}
+:::
+
+```{r}
+#| label: read data with issues using testthat and tee pipe
+#| echo: true
+#| code-line-numbers: "|8,9"
+#| error: true
+
+cohort_data_excel <- readxl::read_excel(
+  path = here::here("data-raw", "Cohort_Excel", 
+    "data_to_harmonise_age_issue.xlsx"),
+  sheet = "Sheet1",
+  col_types = c(
+    "text", "numeric"
+    )
+  ) %T>%
+  testthat::expect_no_condition()
+```
+
+:::
+
+::: {.column width="50%"}
+
+:::{.center-h}
+[**No Issues**]{style="font-size: 80%;"}
+:::
+
+```{r}
+#| label: read data without issues using testthat and tee pipe
+#| code-line-numbers: "|6,7"
+#| echo: true
+
+cohort_data_excel_2 <- readxl::read_excel(
+  path = here::here("data-raw", "Cohort_Excel", 
+    "data_to_harmonise_age_issue_fixed.xlsx"),
+  sheet = "Sheet1",
+  col_types = c("text", "numeric")
+) %T>%
+testthat::expect_no_condition() |> 
+# Check if Serial Number is unique
+  pointblank::rows_distinct(
+    columns = "Serial Number",
+)
+
+```
+
+:::
+
+::::
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Variable Mapping
+
+![](images/variable_mapping_workflow.png){fig-alt="Variable Mapping Reporting Workflow. Starting with introducing the mapping procedure, writing code to do mapping ans validation, showing that the code works, clean up data for merging." fig-align="center" width="100%"}
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Variable Mapping
+
+Let take this data set as an example.
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+```{r}
+#| label: read csv data
+#| echo: true
+
+cohort_csv_data <- vroom::vroom(
+  file = here::here("data-raw",
+                    "Cohort_csv",
+                    "data_to_harmonise.csv"),
+  delim = ",",
+  col_select = 1:8,
+  show_col_types = FALSE,
+  col_types = list(
+    ID = vroom::col_character(),
+    Age = vroom::col_integer(),
+    Sex = vroom::col_character(),
+    Height = vroom::col_double(),
+    Weight = vroom::col_double(),
+    `Smoke History` = vroom::col_character(),
+    `Chest Pain Character` = vroom::col_character(),
+    Dyspnea = vroom::col_character()
+    )
+  ) |>  
+  dplyr::rename(cohort_unique_id = "ID") |>
+  # Remove rows when the ID value is NA
+  dplyr::filter(!is.na(.data[["cohort_unique_id"]])) |>
+  # Remove white spaces in column names
+  dplyr::rename_all(stringr::str_trim) |> 
+  # Check if cohort id is unique
+  pointblank::rows_distinct(
+    columns = "cohort_unique_id",
+  )
+
+cohort_csv_data |> 
+  vroom::problems() |> 
+  pointblank::expect_row_count_match(count = 0)
+
+```
+
+:::
+
+::: {.column width="50%"}
+
+```{r}
+#| label: print csv data
+#| echo: false
+ 
+cohort_csv_data |> 
+  dplyr::mutate(
+    Sex = forcats::fct_relevel(.data[["Sex"]], c("Male", "Female")),
+    `Smoke History` = forcats::fct_relevel(
+      .data[["Smoke History"]], 
+      c("non-smoker", "past smoker", "current smoker")
+    ),
+    `Chest Pain Character` = forcats::fct_relevel(
+      .data[["Chest Pain Character"]], 
+      c("no chest pain", "nonanginal", "atypical", "typical")
+    ),
+    `Dyspnea` = forcats::fct_relevel(
+      .data[["Dyspnea"]], 
+      c("no", "yes")
+    ),
+  ) |> 
+  reactable_with_download_csv_button(
+    defaultPageSize = 5,
+    paginationType = "jump",
+    style = list(fontSize = "1rem"),
+  )
+
+```
+
+:::
+
+::::
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Variable Mapping
+
+Let the reader know how the collaborator's data `Smoke History` is going to be mapped.
+
+![](images/mapping_procedure.png){fig-alt="Documentation indicating how the collaborator's data Smoke History is going to be mapped or harmonised in Quarto code and output." fig-align="center" width="100%"}
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Variable Mapping
+
+![](images/code_to_map.png){fig-alt="Code to do mapping." fig-align="center" width="30%"}
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+```{r}
+#| label: smoking data harmonisation
+#| echo: true
+#| code-line-numbers: "|2,3|5-14|15-24"
+
+smoking_data <- cohort_csv_data |>
+  dplyr::select(c("cohort_unique_id", 
+                  "Smoke History")) |>
+  dplyr::mutate(
+    smoke_current = dplyr::case_when(
+      is.na(.data[["Smoke History"]]) ~ "-1",
+      .data[["Smoke History"]] == "non-smoker" ~ "0",
+      .data[["Smoke History"]] == "past smoker" ~ "0",
+      .data[["Smoke History"]] == "current smoker" ~ "1",
+      .default = NA_character_
+    ),
+    smoke_current = forcats::fct_relevel(
+      .data[["smoke_current"]],
+      c("0", "1")), 
+    smoke_past = dplyr::case_when(
+      is.na(.data[["Smoke History"]]) ~ "-1",
+      .data[["Smoke History"]] == "non-smoker" ~ "0",
+      .data[["Smoke History"]] == "past smoker" ~ "1",
+      .data[["Smoke History"]] == "current smoker" ~ "0",
+      .default = NA_character_
+    ),
+    smoke_past = forcats::fct_relevel(
+      .data[["smoke_past"]],
+      c("0", "1")),
+    `Smoke History` = forcats::fct(
+      .data[["Smoke History"]]
+    )
+  )
+
+```
+
+:::
+
+::: {.column width="50%"}
+
+![](images/smoking_history_documentation.png){fig-alt="Documentation of harmonisation of smoking history." fig-align="center" width="100%"}
+
+:::
+
+::::
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Variable Mapping
+
+![](images/code_to_validate.png){fig-alt="Code to do validation." fig-align="center" width="30%"}
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+```{r}
+#| label: smoking data validation
+#| code-line-numbers: "|2-5|6-12"
+#| echo: true
+
+smoking_data <- smoking_data |>
+  pointblank::col_vals_in_set(
+    columns = c("smoke_current", "smoke_past"),
+    set = c("0", "1", "-1")
+  ) |> 
+  pointblank::col_vals_expr(
+    expr = pointblank::expr(
+      (.data[["smoke_current"]] == "1" & .data[["smoke_past"]] == "0") |
+      (.data[["smoke_current"]] == "-1" & .data[["smoke_past"]] == -"1") |
+      (.data[["smoke_current"]] == "0" & .data[["smoke_past"]] %in% c("0", "1"))
+    )
+  )
+
+```
+
+:::
+
+::: {.column width="50%"}
+
+![](images/smoking_history_validation.png){fig-alt="Documentation of harmonisation of smoking history." fig-align="center" width="100%"}
+
+:::
+
+::::
+
+[Reference: <https://github.com/rstudio/pointblank/issues/578>{target="_blank"}]{style="font-size: 80%;"}
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Variable Mapping
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+![](images/example_works.png){fig-alt="Show examples that the code works." fig-align="center" width="100%"}
+![](images/print_reactable.png){fig-alt="Code to print the reactable in html file." fig-align="center" width="100%"}
+
+:::
+
+::: {.column width="50%"}
+
+:::{.center-h}
+[**Html Output**]{style="font-size: 80%;"}
+:::
+
+```{r}
+#| label: smoking data html
+
+smoking_data |> 
+  reactable_with_download_csv_button(
+    defaultPageSize = 5,
+    paginationType = "jump",
+    style = list(fontSize = "1rem"),
+  )
+
+```
+
+:::
+
+::::
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Variable Mapping
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+![](images/example_works.png){fig-alt="Show examples that the code works." fig-align="center" width="100%"}
+![](images/print_code_pdf.png){fig-alt="Code to print the table in pdf file." fig-align="center" width="100%"}
+
+:::
+
+::: {.column width="50%"}
+
+:::{.center-h}
+[**Pdf Output**]{style="font-size: 80%;"}
+:::
+
+![](images/print_pdf.png){fig-alt="Output code in pdf file." fig-align="center" width="100%"}
+
+![](images/print_pdf_2.png){fig-alt="Output table in pdf file." fig-align="center" width="100%"}
+:::
+
+::::
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Variable Mapping
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+![](images/clean_for_merging.png){fig-alt="Clean for merging." fig-align="center" width="50%"}
+```{r}
+#| label: smoking data for merging
+#| echo: true
+
+smoking_data <- smoking_data |>
+  dplyr::select(-c("Smoke History"))
+
+```
+
+:::
+
+::: {.column width="50%"}
+
+```{r}
+#| label: smoking data for merging html
+
+smoking_data |> 
+  reactable_with_download_csv_button(
+    defaultPageSize = 5,
+    paginationType = "jump",
+    style = list(fontSize = "1rem"),
+  )
+
+```
+
+:::
+
+::::
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Merging Harmonised Data
+
+Suppose we have completed harmonising a batch of clinical data.
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+```{r}
+#| label: age gender data
+
+age_gender_data <- cohort_csv_data |>
+  dplyr::select(c("cohort_unique_id", 
+                  "Age", 
+                  "Sex")) |>
+  pointblank::col_vals_expr(
+    expr = ~is_integer_vector(
+      cohort_A_data[["age"]],
+      allow_na = TRUE)
+  ) |>
+  dplyr::mutate(
+    # Convert age to type integer
+    age_years = as.integer(.data[["Age"]]),
+    # Convert categorical columns to factors
+    sex = dplyr::case_when(
+      .data[["Sex"]] == "Female" ~ "0",
+      .data[["Sex"]] == "Male" ~ "1",
+      .default = NA_character_
+    ),
+    `Sex` = forcats::fct_relevel(
+      .data[["Sex"]],
+      c("Female", "Male")
+    ),
+    sex = forcats::fct_relevel(
+      .data[["sex"]],
+      c("0", "1")),
+  ) |>
+  dplyr::relocate(
+    "sex",
+    .before = "Sex"
+  ) |> 
+  dplyr::relocate(
+    "age_years",
+    .after = "Age"
+  ) |>
+  pointblank::col_vals_in_set(
+    columns = "sex",
+    set = c("0", "1")
+  ) |> 
+  pointblank::col_vals_between(
+    columns = "age_years",
+    left = 0,
+    right = 100,
+    inclusive = c(FALSE, TRUE),
+    na_pass = TRUE
+  ) |>
+  dplyr::select(-c("Age", "Sex"))
+
+```
+
+```{r}
+#| label: age gender data for merging html
+#| echo: true
+
+age_gender_data |> 
+  reactable_with_download_csv_button(
+    defaultPageSize = 5,
+    paginationType = "jump",
+    style = list(fontSize = "1rem"),
+  )
+
+```
+
+:::
+
+::: {.column width="50%"}
+
+```{r}
+#| label: body measurement data
+
+body_measurement_data <- cohort_csv_data |>
+  dplyr::select(c("cohort_unique_id", 
+                  "Height", "Weight")) |>
+  dplyr::mutate(
+    height_cm = .data[["Height"]],
+    weight_kg = .data[["Weight"]],
+    bsa_m2 = sqrt((.data[["height_cm"]] * .data[["weight_kg"]]) / 3600),
+    bsa_m2 = round_to_nearest_digit(.data[["bsa_m2"]], digits = 2),
+    bmi = .data[["weight_kg"]] / ((.data[["height_cm"]] / 100)^2),
+    bmi = round_to_nearest_digit(.data[["bmi"]], digits = 2),
+    height_cm = round_to_nearest_digit(.data[["height_cm"]], digits = 2),
+    weight_kg = round_to_nearest_digit(.data[["weight_kg"]], digits = 2)
+  ) |> 
+  pointblank::col_vals_between(
+    columns = "bmi",
+    left = 10,
+    right = 50,
+    inclusive = c(TRUE, TRUE),
+    na_pass = TRUE
+  ) |>
+  dplyr::select(-c("Height", "Weight"))
+
+```
+
+```{r}
+#| label: body measurement data for merging html
+#| echo: true
+
+body_measurement_data |> 
+  reactable_with_download_csv_button(
+    defaultPageSize = 5,
+    paginationType = "jump",
+    style = list(fontSize = "1rem"),
+  )
+
+```
+
+:::
+
+::::
+
+How can we merge them without issues of missing rows or additional columns ?
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Merging Harmonised Data
+
+`unmatched = "error"` in [`dplyr::inner_join`](https://dplyr.tidyverse.org/reference/mutate-joins.html){target="_blank"} helps to avoid patients with no match.
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+```{r}
+#| label: demo behave data no match in y
+#| code-line-numbers: "|4|7,11,15"
+#| echo: true
+
+join_specification <- dplyr::join_by("cohort_unique_id")
+
+demo_behave_data <- cohort_csv_data |>
+  dplyr::select(c("cohort_unique_id")) |>
+  dplyr::inner_join(age_gender_data,
+                   by = join_specification,
+                   unmatched = "error",
+                   relationship = "one-to-one") |>
+  dplyr::inner_join(body_measurement_data,
+                   by = join_specification,
+                   unmatched = "error",
+                   relationship = "one-to-one") |>
+  dplyr::inner_join(smoking_data,
+                   by = join_specification,
+                   unmatched = "error",
+                   relationship = "one-to-one") |>
+  dplyr::relocate(c("bsa_m2", "bmi"),
+                  .after = "sex")
+
+```
+
+:::
+
+::: {.column width="50%"}
+
+```{r}
+#| label: penguin error no match in y
+#| echo: true
+#| code-line-numbers: "|3-4,11,18"
+#| warning: true
+#| error: true
+
+three_penguins <- tibble::tribble(
+  ~samp_id, ~species,    ~island,
+  1,        "Adelie",    "Torgersen",
+  2,        "Gentoo",    "Biscoe",
+)
+
+weight_extra <- tibble::tribble(
+  ~samp_id,  ~body_mass_g,
+  1,         3220,
+  2,         4730,
+  4,         4725
+)
+
+three_penguins |> 
+  dplyr::inner_join(
+    y = weight_extra,
+    by = dplyr::join_by("samp_id"),
+    unmatched = "error"
+ ) 
+
+```
+
+:::
+
+::::
+
+[Reference: <https://www.tidyverse.org/blog/2023/08/teach-tidyverse-23/#improved-and-expanded-_join-functionality>]{style="font-size: 80%;"}
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Merging Harmonised Data
+
+`unmatched = "error"` in [`dplyr::inner_join`](https://dplyr.tidyverse.org/reference/mutate-joins.html){target="_blank"} helps to avoid patients with no match.
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+```{r}
+#| label: demo behave data no match in x
+#| code-line-numbers: "|7,11,15"
+#| echo: true
+
+join_specification <- dplyr::join_by("cohort_unique_id")
+
+demo_behave_data <- cohort_csv_data |>
+  dplyr::select(c("cohort_unique_id")) |>
+  dplyr::inner_join(age_gender_data,
+                   by = join_specification,
+                   unmatched = "error",
+                   relationship = "one-to-one") |>
+  dplyr::inner_join(body_measurement_data,
+                   by = join_specification,
+                   unmatched = "error",
+                   relationship = "one-to-one") |>
+  dplyr::inner_join(smoking_data,
+                   by = join_specification,
+                   unmatched = "error",
+                   relationship = "one-to-one") |>
+  dplyr::relocate(c("bsa_m2", "bmi"),
+                  .after = "sex")
+
+```
+
+:::
+
+::: {.column width="50%"}
+
+```{r}
+#| label: penguin error no match in x
+#| echo: true
+#| code-line-numbers: "|4,10,11,18"
+#| warning: true
+#| error: true
+
+three_penguins <- tibble::tribble(
+  ~samp_id, ~species,    ~island,
+  1,        "Adelie",    "Torgersen",
+  2,        "Gentoo",    "Biscoe",
+  3,        "Chinstrap", "Dream"
+)
+
+weight_extra <- tibble::tribble(
+  ~samp_id,  ~body_mass_g,
+  1,         3220,
+  3,         4725
+)
+
+three_penguins |> 
+  dplyr::inner_join(
+    y = weight_extra,
+    by = dplyr::join_by("samp_id"),
+    unmatched = "error"
+ ) 
+
+```
+
+:::
+
+::::
+
+[Reference: <https://www.tidyverse.org/blog/2023/08/teach-tidyverse-23/#improved-and-expanded-_join-functionality>]{style="font-size: 80%;"}
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Merging Harmonised Data
+
+`relationship = "one-to-one"` in [`dplyr::inner_join`](https://dplyr.tidyverse.org/reference/mutate-joins.html){target="_blank"} helps to avoid patients with multiple match.
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+```{r}
+#| label: demo behave data 2
+#| code-line-numbers: "|8,12,16"
+#| echo: true
+
+join_specification <- dplyr::join_by("cohort_unique_id")
+
+demo_behave_data <- cohort_csv_data |>
+  dplyr::select(c("cohort_unique_id")) |>
+  dplyr::inner_join(age_gender_data,
+                   by = join_specification,
+                   unmatched = "error",
+                   relationship = "one-to-one") |>
+  dplyr::inner_join(body_measurement_data,
+                   by = join_specification,
+                   unmatched = "error",
+                   relationship = "one-to-one") |>
+  dplyr::inner_join(smoking_data,
+                   by = join_specification,
+                   unmatched = "error",
+                   relationship = "one-to-one") |>
+  dplyr::relocate(c("bsa_m2", "bmi"),
+                  .after = "sex")
+
+```
+
+:::
+
+::: {.column width="50%"}
+
+```{r}
+#| label: penguin error 2
+#| echo: true
+#| code-line-numbers: "|4,11,12,20"
+#| warning: true
+#| error: true
+
+three_penguins <- tibble::tribble(
+  ~samp_id, ~species,    ~island,
+  1,        "Adelie",    "Torgersen",
+  2,        "Gentoo",    "Biscoe",
+  3,        "Chinstrap", "Dream"
+)
+
+weight_extra <- tibble::tribble(
+  ~samp_id,  ~body_mass_g,
+  1,         3220,
+  2,         4730,
+  2,         4725,
+  3,         4000
+)
+
+three_penguins |> 
+  dplyr::inner_join(
+    y = weight_extra,
+    by = dplyr::join_by("samp_id"),
+    relationship = "one-to-one"
+ ) 
+
+```
+
+:::
+
+::::
+
+[Reference: <https://www.tidyverse.org/blog/2023/08/teach-tidyverse-23/#improved-and-expanded-_join-functionality>]{style="font-size: 80%;"}
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Merging Harmonised Data 
+
+Use [`pointblank::has_columns`](https://rstudio.github.io/pointblank/reference/has_columns.html){target="_blank"} to ensure we only have harmonised variables.
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+```{r}
+#| label: demo behave data validation
+#| echo: true
+
+testthat::expect_false(
+  pointblank::has_columns(
+    demo_behave_data,
+    columns = c(
+      dplyr::ends_with(".x"), 
+      dplyr::ends_with(".y")
+    )
+  )
+)
+
+testthat::expect_equal(
+  ncol(demo_behave_data), 9
+)
+
+testthat::expect_true(
+  pointblank::has_columns(
+    demo_behave_data,
+    columns = c(
+      "age_years", "sex",
+      "height_cm", "weight_kg", "bsa_m2", "bmi",
+      "smoke_current", "smoke_past"
+    )
+  )
+) 
+
+```
+
+:::
+
+::: {.column width="50%"}
+
+```{r}
+#| label: penguin error 3
+#| echo: true
+#| code-line-numbers: "|2,9|24-29"
+#| warning: true
+#| error: true
+
+three_penguins <- tibble::tribble(
+  ~samp_id, ~species,    ~island,
+  1,        "Adelie",    "Torgersen",
+  2,        "Gentoo",    "Biscoe",
+  3,        "Chinstrap", "Dream"
+)
+
+weight_extra <- tibble::tribble(
+  ~samp_id,  ~island,
+  1,         "Torgersen",
+  2,         "Biscoe",
+  3,         "Dream"
+)
+
+three_penguins <- three_penguins |> 
+  dplyr::inner_join(
+    y = weight_extra,
+    by = dplyr::join_by("samp_id"),
+    unmatched = "error",
+    relationship = "one-to-one"
+ )
+
+three_penguins |> 
+  pointblank::has_columns(
+    columns = c(
+      dplyr::ends_with(".x"), 
+      dplyr::ends_with(".y")
+      )
+  )
+
+colnames(three_penguins)
+
+```
+
+:::
+
+::::
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Harmonisation Report Types
+
+Collaborator wants different ways to report how data harmonisation is done.
+
+![](images/documentation_types.png){fig-alt="Four major documentation type." fig-align="center" width="70%"}
+
+[The documentation system by [Divio](https://docs.divio.com/documentation-system/){target="_blank"}]{style="font-size: 60%;"}
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Harmonisation Report Types
+
+Collaborator wants different ways to report how data harmonisation is done.
+
+![](images/documentation_types_for_harmonisation.png){fig-alt="Four major documentation type in terms of data harmonisation" fig-align="center" width="70%"}
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Tehcncal Report Challenge
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+:::{.fragment}
+
+One variable mapping report takes at least one page.
+
+:::
+
+:::{.fragment}
+
+On average, a clinical trial will have a few hundred variables.
+
+* [One hundred columns for clinical and demographics.]{style="font-size: 80%;"}
+* [Two hundred columns for medication.]{style="font-size: 80%;"}
+
+:::
+
+:::{.fragment}
+
+Harmonisation report can have at least a few hundreds pages for each cohort.
+
+There is a need to automate the creation of these reports.
+
+:::
+
+:::
+
+::: {.column width="50%"}
+
+![](images/overload.jpg){fig-alt="Businessman in pile of documents asking for help." fig-align="center" width="87%"}
+
+[Businessman in pile of documents asking for help by [Amonrat Rungreangfangsai](https://www.vecteezy.com/vector-art/464741-businessman-in-pile-of-documents-asking-for-help-over-workload){target="_blank"}]{style="font-size: 60%;"}
+
+:::
+
+::::
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Quarto Books
+
+To make a Quarto book or website, we need a `_quarto.yml` and `index.qmd` file
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+![](images/quarto_yml.png){fig-alt="A preview of the _quarto.yml file." fig-align="center" width="100%"}
+
+:::
+
+::: {.column width="50%"}
+
+![](images/index_qmd.png){fig-alt="A preview of the index.qmd file." fig-align="center" width="100%"}
+
+:::
+
+::::
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Automated Technical Report (Reference)
+
+We create an `index.qmd` file for technical report generation.
+
+![](images/index_report_qmd.png){fig-alt="A preview of the index.qmd file for technical reporting." fig-align="center" width="40%"}
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Automated Technical Report (Reference)
+
+We create a `_quarto.yml` file and relevant Quarto files for each cohort.
+
+![](images/report_for_cohort_A.png){fig-alt="A preview of the _quarto.yml and relevant Quarto files for Cohort A." fig-align="center" width="60%"}
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Automated Technical Report (Reference)
+
+Create a script to generate technical reports in pdf, word and html for each cohort.
+
+:::: {.columns}
+
+::: {.column width="30%"}
+
+```{r}
+#| label: copy index report qmd
+#| echo: true
+#| eval: false
+
+# Copy the right index.qmd 
+# file
+
+index_qmd_file <- paste0(
+  "_index_",
+  "report",
+  ".qmd"
+)
+
+fs::file_copy(
+  path = here::here(
+    "templates",
+    "index-qmd",
+    index_qmd_file),
+  new_path = here::here(
+    "index.qmd"
+  ),
+  overwrite = TRUE
+)
+
+```
+
+:::
+
+::: {.column width="70%"}
+
+![](images/index_qmd_copy.png){fig-alt="index_report.qmd file copied and changed to index.qmd" fig-align="center" width="100%"}
+:::
+
+::::
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Automated Technical Report (Reference)
+
+Create a script to generate technical reports in pdf, word and html for each cohort.
+
+:::: {.columns}
+
+::: {.column width="30%"}
+
+```{r}
+#| label: automated report
+#| echo: true
+#| eval: false
+#| code-line-numbers: "|5-21|23-26|29-37"
+
+
+copy_and_render <- function(
+    cohort
+) {
+
+  # Copy quarto.yml file
+  # for each cohort
+  
+  quarto_yml_file <- paste0(
+    "_quarto_",
+    cohort,
+    ".yml"
+  )
+
+  fs::file_copy(
+    path = here::here(
+      "templates",
+      "quarto-yaml",
+      quarto_yml_file),
+    new_path = here::here("_quarto.yml"),
+    overwrite = TRUE
+  )
+  
+  # Render each cohort
+  quarto::quarto_render(
+    as_job = FALSE
+  )
+}
+
+cohort_name <- c("Cohort_A", 
+                 "Cohort_B")
+
+purrr::walk(
+  .x = cohort_name,
+  .f = ~copy_and_render(
+    cohort = .x
+  )
+)
+
+```
+
+:::
+
+::: {.column width="70%"}
+
+![](images/quarto_yml_copy.png){fig-alt="_quarto_Cohort_A.yml file copied and changed to _quarto.qmd" fig-align="center" width="100%"}
+:::
+
+::::
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Automated Technical Report (Reference)
+
+![](images/technical_report.png){fig-alt="Output of technical report." fig-align="center" width="80%"}
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Automated Summary Report (How-to-Guide)
+
+A similar method is done to create a summary report in word using [`flextable`](https://davidgohel.github.io/flextable/).
+
+![](images/summary_report.png){fig-alt="Preview of summary report." fig-align="center" width="70%"}
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+
+## Overview Diagrams
+
+How many variables can each cohort provide ? 
+
+How many variables can be harmonised ?
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+```{r}
+#| label: Venn Diagram
+#| echo: true
+#| eval: true
+#| output: false
+
+demographic_list <- list(
+  A = c("Age", "Sex",
+        "Hypertension", "Dyslipidemia", "Family Hx CAD", "Diabetes",
+        "Smoke Current", "Smoke Past",
+        "Have Chest Pain", "Chest Pain Character",
+        "Dyspnea",
+        "BMI", "Height", "Weight"),
+  B = c("Age", "Sex",
+        "Hypertension", "Dyslipidemia", "Family Hx CAD", "Diabetes",
+        "Smoke Current", "Smoke Past",
+        "Have Chest Pain", "Chest Pain Character",
+        "Dyspnea",
+        "HDL", "Total Cholesterol", 
+        "Triglyceride", "LDL"),
+  C = c("Age", "Sex",
+        "Hypertension", "Dyslipidemia", "Family Hx CAD", "Diabetes",
+        "Smoke Current", "Smoke Past",
+        "Have Chest Pain", "Chest Pain Character",
+        "Dyspnea",
+        "BMI", "Height", "Weight",
+        "HDL", "Total Cholesterol", 
+        "Triglyceride", "LDL")
+)  
+
+cohort_a_label_name <- "Cohort A\n(n=1000)"
+cohort_b_label_name <- "Cohort B\n(n=2000)"
+cohort_c_label_name <- "Cohort C\n(n=1500)"
+
+demographic_venn_data <- demographic_list |> 
+  RVenn::Venn() |> 
+  ggVennDiagram::process_data()
+
+demographic_venn_regionedge_data <- demographic_venn_data |> 
+  ggVennDiagram::venn_regionedge() |> 
+  dplyr::mutate(
+    name = stringr::str_replace_all(
+      .data[["name"]],
+      "/",
+      " and "
+    ),
+    name = stringr::str_wrap(.data[["name"]], width = 10),
+    name = forcats::fct_reorder(.data[["name"]],
+                                nchar(.data[["id"]]))
+  ) |> 
+  dplyr::rename(`Cohort` = "name")
+
+demographic_venn_label_data <- demographic_venn_data |>
+  ggVennDiagram::venn_setlabel() |> 
+  dplyr::mutate(
+    name = dplyr::case_match(
+      .data[["name"]],
+      "A" ~ cohort_a_label_name,
+      "B" ~ cohort_b_label_name,
+      "C" ~ cohort_c_label_name
+    )
+  ) |> 
+  dplyr::rename(`Cohort` = "name")
+
+demographic_venn_regionlabel_data <- demographic_venn_data |> 
+  ggVennDiagram::venn_regionlabel() |> 
+  dplyr::mutate(
+    name = stringr::str_replace_all(
+      .data[["name"]],
+      "/",
+      " and "
+    ),
+    name = stringr::str_wrap(.data[["name"]], width = 10),
+    name = forcats::fct_reorder(.data[["name"]],
+                                nchar(.data[["id"]]))
+  ) |> 
+  dplyr::rename(`Cohort` = "name")
+
+demographic_venn_edge_data <- demographic_venn_data |> 
+  ggVennDiagram::venn_setedge()
+
+demographic_venn_diagram <- ggplot2::ggplot() +
+  # 1. region count layer
+  ggplot2::geom_polygon(
+    data = demographic_venn_regionedge_data,
+    mapping = ggplot2::aes(
+      x = .data[["X"]], y = .data[["Y"]],
+      fill = .data[["Cohort"]],
+      group = .data[["id"]])
+  ) +
+  # 2. set edge layer
+  ggplot2::geom_path(
+    data = demographic_venn_edge_data,
+    mapping = ggplot2::aes(
+      x = .data[["X"]], y = .data[["Y"]],
+      colour = "black",
+      group = .data[["id"]]
+    ),    
+    show.legend = FALSE
+  ) +
+  # 3. set label layer
+  ggplot2::geom_text(
+    data = demographic_venn_label_data,
+    mapping = ggplot2::aes(
+      x = .data[["X"]], y = .data[["Y"]],
+      label = .data[["Cohort"]]),
+    size = 5.5
+  ) +
+  # 4. region label layer
+  ggplot2::geom_label(
+    data = demographic_venn_regionlabel_data,
+    mapping = ggplot2::aes(
+      x = .data[["X"]], y = .data[["Y"]],
+      label = .data[["count"]]),
+    size = 7
+  ) +
+  ggplot2::scale_x_continuous(
+    expand = ggplot2::expansion(mult = 0.2)
+  ) +
+  ggplot2::theme_void() +
+  ggplot2::theme(
+    text = element_text(size = 20)
+  )
+
+```
+
+:::
+
+::: {.column width="50%"}
+
+```{r}
+#| label: Venn Diagram Show
+#| fig-height: 8
+#| fig-align: center
+#| fig-alt: |
+#|   An venn diagram showing common variables within six cohorts
+
+demographic_venn_diagram 
+
+```
+
+:::
+
+::::
+
+Venn diagram does not work for many (> 10) cohorts.
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Overview Diagrams
+
+Upset plots are too complicated for clinicians.
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+```{r}
+#| label: Upset Diagram
+#| echo: true
+#| eval: true
+#| output: false
+
+demographic_venn <- tibble::tibble(
+  column_name = c("Age", "Sex",
+                  "Hypertension", "Dyslipidemia", "Family Hx CAD", "Diabetes",
+                  "Smoke Current", "Smoke Past",
+                  "Have Chest Pain", "Chest Pain Character",
+                  "Dyspnea",
+                  "BMI", "Height", "Weight",
+                  "HDL", "Total Cholesterol", 
+                  "Triglyceride", "LDL"),
+  `Cohort A` = c(1, 1,
+                 1, 1, 1, 1,
+                 1, 1,
+                 1, 1,
+                 1,
+                 1, 1, 1,
+                 0, 0, 
+                 0, 0),
+  `Cohort B` = c(1, 1,
+                 1, 1, 1, 1,
+                 1, 1,
+                 1, 1,
+                 1,
+                 0, 0, 0,
+                 1, 1, 
+                 1, 1),
+  `Cohort C` = c(1, 1,
+                 1, 1, 1, 1,
+                 1, 1,
+                 1, 1,
+                 1,
+                 1, 1, 1,
+                 1, 1, 
+                 1, 1),
+  `Cohort D` = c(1, 1,
+                 1, 1, 1, 1,
+                 1, 1,
+                 1, 1,
+                 0,
+                 1, 0, 0,
+                 1, 1, 
+                 1, 1),
+  `Cohort E` = c(1, 1,
+                 1, 1, 1, 1,
+                 1, 1,
+                 1, 1,
+                 0,
+                 1, 1, 1,
+                 1, 1, 
+                 0, 0),
+  `Cohort F` = c(1, 1,
+                 1, 1, 1, 1,
+                 1, 1,
+                 1, 1,
+                 0,
+                 1, 1, 1,
+                 0, 0, 
+                 0, 0),
+)
+
+cohort_a_upset_col_name <- "Cohort A\n(n=1000)"
+cohort_b_upset_col_name <- "Cohort B\n(n=2000)"
+cohort_c_upset_col_name <- "Cohort C\n(n=1500)"
+cohort_d_upset_col_name <- "Cohort D\n(n=500)"
+cohort_e_upset_col_name <- "Cohort E\n(n=1000)"
+cohort_f_upset_col_name <- "Cohort F\n(n=2500)"
+
+
+demographic_upset_data <- demographic_venn |>
+  dplyr::rename(
+    !!cohort_a_upset_col_name := "Cohort A",
+    !!cohort_b_upset_col_name := "Cohort B",
+    !!cohort_c_upset_col_name := "Cohort C",
+    !!cohort_d_upset_col_name := "Cohort D",
+    !!cohort_e_upset_col_name := "Cohort E",
+    !!cohort_f_upset_col_name := "Cohort F"
+  )
+
+upset_plot <- ComplexUpset::upset(
+  demographic_upset_data,
+  c(cohort_a_upset_col_name, 
+    cohort_b_upset_col_name, 
+    cohort_c_upset_col_name,
+    cohort_d_upset_col_name,
+    cohort_e_upset_col_name,
+    cohort_f_upset_col_name),
+  base_annotations = list(
+    `Intersection size` = 
+      ComplexUpset::intersection_size(
+        text = list(size = 9, nudge_y = 0.5),
+        text_colors = c(on_background='black', 
+                        on_bar='white')
+      ) + 
+      ggplot2::annotate(
+        size = 5.5,
+        geom = 'text', 
+        x = Inf, 
+        y = Inf,
+        label = paste('Total:', nrow(demographic_venn)),
+        vjust = 1, 
+        hjust = 1
+      ) + 
+      ggplot2::theme(
+        axis.title.y = ggplot2::element_text(angle = 0, size = 20),
+        axis.title.x = ggplot2::element_text(angle = 0, size = 20), 
+        text = element_text(size = 20)
+      ) +
+      ggplot2::labs(y = "",
+                    title = "Intersection size")
+      ),
+  set_sizes = ( 
+    ComplexUpset::upset_set_size() +
+    ggplot2::geom_text(
+      size = 5.5,
+      mapping = ggplot2::aes(label= ggplot2::after_stat(.data[["count"]])), 
+      hjust = 1.5, 
+      stat = 'count') +
+    ggplot2::expand_limits(y = 30) + 
+    ggplot2::theme(
+        axis.title.y = ggplot2::element_text(angle = 0, size = 15),
+        axis.title.x = ggplot2::element_text(angle = 0, size = 15), 
+        text = element_text(size = 15)
+    ) +
+    ggplot2::labs(y = "Number of variables")
+  ),
+  sort_intersections_by = "degree",
+  sort_sets = FALSE,
+  name = "", 
+  width_ratio = 0.25,
+  themes = ComplexUpset::upset_default_themes(text = element_text(size = 15))
+  )
+
+```
+
+:::
+
+::: {.column width="50%"}
+
+```{r}
+#| label: Upset Diagram Print
+#| fig-height: 8
+#| fig-align: center
+#| fig-alt: |
+#|   An upset plot showing common variables within six cohorts
+
+upset_plot |>
+  print()
+ 
+```
+
+:::
+
+Cannot answer follow-up questions:
+
+[How many cohorts provide patient's blood lipid information and how many patients have them ?]{style="font-size: 80%;"}
+
+::::
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Overview Diagrams
+
+Create a "heatmap"using Microsoft PowerPoint.
+
+![](images/suggested_heatmap.png){fig-alt="A modified heatmap to show command variables." fig-align="center" width="100%"}
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Summary
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+![](images/data_harmonisation_smaller.png){fig-alt="The data harmonization process: Study data variables collected from different sources need to be mapped to one another, classified into the generalized concepts they represent, and transformed into unified harmonized variables for analysis" fig-align="center" width="100%" .fragment}
+
+![](images/variable_mapping_workflow.png){fig-alt="Variable Mapping Reporting Workflow. Starting with introducing the mapping procedure, writing code to do mapping ans validation, showing that the code works, clean up data for merging." fig-align="center" width="100%" .fragment}
+
+:::
+
+::: {.column width="50%"}
+
+![](images/documentation_types_for_harmonisation.png){fig-alt="Four major documentation type in terms of data harmonisation" fig-align="center" width="90%" .fragment}
+
+![](images/suggested_heatmap.png){fig-alt="A modified heatmap to show command variables." fig-align="center" width="90%" .fragment}
+
+:::
+
+::::
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Thank you
+
+:::: {.columns}
+
+Harmonisation project template: <https://github.com/JauntyJJS/harmonisation/>{target="_blank"}
+
+::: {.column width="50%"}
+
+![](images/data_harmonisation_github_page.png){fig-alt="Data harmonisation project template on Github." fig-align="center" width="100%"}
+
+:::
+
+::: {.column width="50%"}
+
+![](images/198-feature-complete.png){fig-alt="Comic from Monkeyuser.com showing a lot of work needs to be done after adding a new feature." fig-align="center" width="80%"}
+
+[[Feature Complete](https://www.monkeyuser.com/2020/feature-complete/){target="_blank"} from [MonkeyUser.com](https://www.monkeyuser.com/){target="_blank"}]{style="font-size: 60%;"}
+
+:::
+
+::::
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
+
+## Happy 60th Birthday Singapore
+
+![](images/Animation2.gif){fig-alt="Gif image of the 60th National Day Parade in Singapore themed Majulah Singapura." fig-align="center" width="80%"}
+
+[[Singapore National Day Parade (NDP) 2025 Logo](https://www.ndp.gov.sg/about-ndp-25/ndp-logo){target="_blank"} from <https://www.ndp.gov.sg>{target="_blank"}]{style="font-size: 60%;"}
+
+::: footer
+
+[https://jauntyjjs.github.io/useR-2025_harmonisation
+`r fontawesome::fa(name = "link", fill = "#666666")`](https://jauntyjjs.github.io/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "github", fill = "#000000")`](https://github.com/JauntyJJS/useR-2025_harmonisation){target="_blank"} [`r fontawesome::fa(name = "file-pdf", fill = "#b50b00")`](https://raw.githubusercontent.com/JauntyJJS/useR-2025_harmonisation/main/index.pdf){target="_blank"}
+
+:::
